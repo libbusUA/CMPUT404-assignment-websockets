@@ -42,17 +42,41 @@ function debug(str) {
 }
 debug("Test");
 
+//code from previous assignment
+function sendJSONXMLHTTPRequest(url, objects, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    callback(JSON.parse(xhr.responseText))
+                }
+            } 
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    //For the previous code I had to update the POST portion to use object['method']
+    //For nicer looking code and potential fix for bugs. 
+    xhr.open(objects['method'], url)
+    xhr.setRequestHeader('Accept', objects['accept'])
+    xhr.setRequestHeader('Content-Type', 'application/json')
+
+    xhr.send(JSON.stringify(objects['data']))
+}
 world = {};
 
 //XXX: TODO Make this prettier!
 function drawCircle(context,entity) {
     with(context) {
-        beginPath();                
-        lineWidth = 3;
+        beginPath();
+        //Added in a new colour to the fill style and made a smaller line width                
+        lineWidth = 1;
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
-        fillStyle = entity["colour"];
+        fillStyle = '#FF0000';
         strokeStyle = fillStyle;
         arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
         stroke();                                
@@ -123,8 +147,11 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    //drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    let information = {}
+    information[entity] = data
+    socket.send(JSON.stringify(information))
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -230,17 +257,16 @@ mouse = (function() {
 
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
-mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
-});
+// mouse.mousedowners.push(function(x,y,clicked,e) {
+//     addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+// });
 
-mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
-});
+// mouse.mouseuppers.push(function(x,y,clicked,e) {
+//     addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+// });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
-                          'radius':10});
+    addEntityWithoutName({'x':x,'y':y,'colour':'pink'});
 });
 
 
@@ -248,12 +274,24 @@ function update() {
     drawFrame();
 }
 
-
+//Similar to the update function in previous assignment that I worked on but changed to be better
 function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
+        sendJSONXMLHTTPRequest(
+            'http://' + host +'/world',
+            {
+                'accept': 'application/json',
+                'method': 'GET',
+                'data': world
+            },
+            (data) => {
+                world = data
+                drawFrame()
+            }
+        )
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -261,7 +299,11 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here?
+            let data = JSON.parse(msg.data)
+            key = Object.keys(data)[0]
+            world[key] = data[key]
+            drawNextFrame()            
         } catch (e) {
             alert("socket on message: " + e);
         }
