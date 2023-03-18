@@ -94,7 +94,21 @@ def hello():
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
-    return None
+    #Again taken from example.py in lecture slides and updated to fit for assignment
+    try:
+        while True:
+            msg = ws.receive()
+            if (msg is not None):
+                '''Do nothing'''
+                packet = json.loads(msg)
+                #load data but not sending anything here we are setting an entity
+                for item in packet:
+                    myWorld.set(item, packet[item])
+                #send_all_json( packet )
+            else:
+                break
+    except:
+        '''Done'''
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
