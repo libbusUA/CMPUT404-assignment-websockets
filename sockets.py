@@ -153,7 +153,7 @@ def update(entity):
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
-    return None
+    return myWorld.world()
 
 @app.route("/entity/<entity>")    
 def get_entity(entity):
@@ -164,7 +164,8 @@ def get_entity(entity):
 @app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
-    return None
+    myWorld.clear()
+    return myWorld.world()
 
 
 
