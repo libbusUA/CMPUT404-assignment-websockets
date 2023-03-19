@@ -257,16 +257,16 @@ mouse = (function() {
 
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
-// mouse.mousedowners.push(function(x,y,clicked,e) {
-//     addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
-// });
+mouse.mousedowners.push(function(x,y,clicked,e) {
+    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+});
 
-// mouse.mouseuppers.push(function(x,y,clicked,e) {
-//     addEntityWithoutName({'x':x,'y':y,'colour':'red'});
-// });
+mouse.mouseuppers.push(function(x,y,clicked,e) {
+    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+});
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'pink'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'green'});
 });
 
 
@@ -279,6 +279,7 @@ function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
+        // debug("working?")
         //XXX: TODO What are you going to do here?
         sendJSONXMLHTTPRequest(
             'http://' + host +'/world',
@@ -289,12 +290,13 @@ function wsSetup() {
             },
             (data) => {
                 world = data
-                drawFrame()
+                drawNextFrame()
             }
         )
     };
     socket.onerror = function(msg) {
-        debug("WebSocket Error:" + msg.data);
+        // debug(msg)
+        // debug("WebSocket Error:" + msg.data);
     };
     socket.onmessage = function(msg) {  
         try {
