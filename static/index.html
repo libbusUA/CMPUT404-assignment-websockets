@@ -40,7 +40,6 @@ function debug(str) {
     var debugDiv = document.getElementById('debug');
     debugDiv.innerHTML = "" + str;
 }
-debug("Test");
 
 //code from previous assignment
 function sendJSONXMLHTTPRequest(url, objects, callback) {
@@ -279,7 +278,6 @@ function wsSetup() {
     var url = "ws://"+host+"/subscribe";   
     socket = new WebSocket(url);
     socket.onopen = function() {
-        // debug("working?")
         //XXX: TODO What are you going to do here?
         sendJSONXMLHTTPRequest(
             'http://' + host +'/world',
@@ -295,8 +293,7 @@ function wsSetup() {
         )
     };
     socket.onerror = function(msg) {
-        // debug(msg)
-        // debug("WebSocket Error:" + msg.data);
+        debug("WebSocket Error:" + msg.data);
     };
     socket.onmessage = function(msg) {  
         try {
